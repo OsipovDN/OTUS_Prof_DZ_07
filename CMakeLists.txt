@@ -23,7 +23,7 @@ target_include_directories(
 )
 
 target_include_directories(
-    commands_gtest PRIVATE 
+    commands_gtest PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -31,6 +31,7 @@ target_include_directories(
     commands_gtest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/test
 )
+
 
 target_include_directories(
     commands_gtest PRIVATE
