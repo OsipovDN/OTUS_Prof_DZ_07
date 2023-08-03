@@ -3,15 +3,38 @@
 #include <algorithm>
 #include <vector>
 
+using PulBlock = std::vector<std::string>;
+using Iter = std::vector< std::string >::const_iterator;
+
 bool isDig(char* arg) {
 	std::string num = arg;
 	auto isdig = [](char ch) {return std::isdigit(ch); };
 	return std::all_of(num.cbegin(), num.cend(), isdig);
 }
 
+bool addStatBlock(PulBlock& bl, const std::string& str) {
+	bl.push_back(str);
+	if (bl.size() == bl.capacity())
+		return false;
+	else 
+		return true;
+}
+
+void addDynBlock(const PulBlock& , const std::string& ) {
+	
+}
+
+void printBlock(Iter st, Iter end) {
+	std::cout << "bulk: ";
+	std::for_each(st, end - 1, [](const std::string& str) {std::cout << str << ","; });
+	std::cout << *(end - 1) << std::endl;
+}
+
+
 int main(int argc, char* argv[])
 {
-	int block_count;
+	int cmd_count;
+	//Проверка корректности ввода
 	if (argc != 2) {
 		std::cout << "Incorrect argument input" << std::endl;
 		exit(1);
@@ -20,20 +43,37 @@ int main(int argc, char* argv[])
 		std::cout << "Not a val" << std::endl;
 		exit(1);
 	}
-	block_count = atoi(argv[1]);
+	//Фиксируем введенное значение
+	cmd_count = atoi(argv[1]);
 
-	std::vector<std::string> pul_block;
-	std::string block;
-	size_t i = 0;
-	while (i != block_count) {
-		std::cin >> block;
-		pul_block.push_back(block);
-		i++;
-	}
+	//Заполнение статического блока
+	std::string cmd;
+	PulBlock static_pul_block;
+	PulBlock dynamic_pul_block;
+	static_pul_block.reserve(cmd_count);
 
-	auto predPrint = [](const std::string& bl) {
-		std::cout << bl << std::endl; };
-	std::for_each(pul_block.cbegin(), pul_block.cend(), predPrint);
+	Iter it_start;
+	Iter it_end;
+	bool flag_ins=false;
+
+	//Заполнение статического блока
+	do {
+		std::cin >> cmd;
+		if (cmd != "{")
+			flag_ins= addStatBlock(static_pul_block,cmd);
+		else {
+			if (!static_pul_block.empty()) {
+				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+				static_pul_block.clear();
+			}
+			addDynBlock(dynamic_pul_block, cmd);
+		}
+	} while (flag_ins||cmd=="EOF");
+
+	//Вывод на печать статического блока
+	printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+
+
 
 	return 0;
 }
