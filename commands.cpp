@@ -12,6 +12,21 @@ bool isDig(char* arg) {
 	return std::all_of(num.cbegin(), num.cend(), isdig);
 }
 
+void addBlock(PulBlock& p, const size_t& c) {
+	size_t i = 0;
+	std::string block;
+	while (i != c) {
+		std::cin >> block;
+		if (block == "EOF") {
+			p.push_back(block);
+			break;
+		}
+		else
+			p.push_back(block);
+		i++;
+	}
+}
+
 bool addStatBlock(PulBlock& bl, const std::string& str) {
 	bl.push_back(str);
 	if (bl.size() == bl.capacity())
