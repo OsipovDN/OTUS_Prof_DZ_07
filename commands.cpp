@@ -19,6 +19,8 @@ void printBlock(Iter st, Iter end) {
 }
 
 bool addStatBlock(PulBlock& bl, const std::string& str) {
+	if(str=="EOF")
+		return false;
 	bl.push_back(str);
 	if (bl.size() == bl.capacity())
 		return false;
@@ -26,8 +28,9 @@ bool addStatBlock(PulBlock& bl, const std::string& str) {
 		return true;
 }
 
-void addDynBlock(const PulBlock& , const std::string& ) {
-	
+
+bool addDynBlock(PulBlock& , std::string& ) {
+	return 0;
 }
 
 
@@ -54,29 +57,18 @@ int main(int argc, char* argv[])
 
 	Iter it_start;
 	Iter it_end;
-	bool flag_ins=false;
+	bool flag_ins = false;
 
 	//Заполнение статического блока
 	do {
 		std::cin >> cmd;
-		if (cmd != "{") {
-			flag_ins = addStatBlock(static_pul_block, cmd);
-			if (!flag_ins) {
-				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
-				static_pul_block.clear();
-			}
-
-		}
-		else {
-			if (!static_pul_block.empty()) {
-				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
-				static_pul_block.clear();
-			}
+		flag_ins = addStatBlock(static_pul_block, cmd);
+		if (!flag_ins) {
+			printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+			static_pul_block.clear();
 			addDynBlock(dynamic_pul_block, cmd);
 		}
-	} while (cmd!="EOF");
-
-
+	} while (cmd != "EOF");
 
 	return 0;
 }
