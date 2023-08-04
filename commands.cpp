@@ -12,19 +12,10 @@ bool isDig(char* arg) {
 	return std::all_of(num.cbegin(), num.cend(), isdig);
 }
 
-void addBlock(PulBlock& p, const size_t& c) {
-	size_t i = 0;
-	std::string block;
-	while (i != c) {
-		std::cin >> block;
-		if (block == "EOF") {
-			p.push_back(block);
-			break;
-		}
-		else
-			p.push_back(block);
-		i++;
-	}
+void printBlock(Iter st, Iter end) {
+	std::cout << "bulk: ";
+	std::for_each(st, end - 1, [](const std::string& str) {std::cout << str << ","; });
+	std::cout << *(end - 1) << std::endl;
 }
 
 bool addStatBlock(PulBlock& bl, const std::string& str) {
@@ -37,12 +28,6 @@ bool addStatBlock(PulBlock& bl, const std::string& str) {
 
 void addDynBlock(const PulBlock& , const std::string& ) {
 	
-}
-
-void printBlock(Iter st, Iter end) {
-	std::cout << "bulk: ";
-	std::for_each(st, end - 1, [](const std::string& str) {std::cout << str << ","; });
-	std::cout << *(end - 1) << std::endl;
 }
 
 
@@ -74,8 +59,14 @@ int main(int argc, char* argv[])
 	//Заполнение статического блока
 	do {
 		std::cin >> cmd;
-		if (cmd != "{")
-			flag_ins= addStatBlock(static_pul_block,cmd);
+		if (cmd != "{") {
+			flag_ins = addStatBlock(static_pul_block, cmd);
+			if (!flag_ins) {
+				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+				static_pul_block.clear();
+			}
+
+		}
 		else {
 			if (!static_pul_block.empty()) {
 				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
@@ -83,10 +74,7 @@ int main(int argc, char* argv[])
 			}
 			addDynBlock(dynamic_pul_block, cmd);
 		}
-	} while (flag_ins||cmd=="EOF");
-
-	//Вывод на печать статического блока
-	printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+	} while (cmd!="EOF");
 
 
 
