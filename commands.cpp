@@ -74,8 +74,14 @@ int main(int argc, char* argv[])
 	//Заполнение статического блока
 	do {
 		std::cin >> cmd;
-		if (cmd != "{")
-			flag_ins= addStatBlock(static_pul_block,cmd);
+		if (cmd != "{") {
+			flag_ins = addStatBlock(static_pul_block, cmd);
+			if (!flag_ins) {
+				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+				static_pul_block.clear();
+			}
+
+		}
 		else {
 			if (!static_pul_block.empty()) {
 				printBlock(static_pul_block.cbegin(), static_pul_block.cend());
@@ -83,10 +89,7 @@ int main(int argc, char* argv[])
 			}
 			addDynBlock(dynamic_pul_block, cmd);
 		}
-	} while (flag_ins||cmd=="EOF");
-
-	//Вывод на печать статического блока
-	printBlock(static_pul_block.cbegin(), static_pul_block.cend());
+	} while (cmd!="EOF");
 
 
 
