@@ -29,9 +29,9 @@ private:
 	bool isScope(const std::string& str) {
 		if (str == "{" || str == "}") {
 			if (str == "{")
-				flag_scope = true;
+			flag_scope = true;
 			if (str == "}")
-				flag_scope = false;
+			flag_scope = false;
 			return true;
 		}
 		else
@@ -72,8 +72,8 @@ public:
 			std::cin >> cmd;
 			if (isScope(cmd)) {
 				if (flag_scope) {
-					printBlock<StaticPullBlock>(st_pl_cmd.cbegin(), st_pl_cmd.cend());
-					st_pl_cmd.clear();
+				printBlock<StaticPullBlock>(st_pl_cmd.cbegin(), st_pl_cmd.cend());
+				st_pl_cmd.clear();
 					addDynBlock(cmd);
 				}
 				else 
