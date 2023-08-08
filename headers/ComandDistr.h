@@ -29,21 +29,19 @@ private:
 	bool isScope(const std::string& str) {
 		if (str == "{" || str == "}") {
 			if (str == "{")
-			flag_scope = true;
+				flag_scope = true;
 			if (str == "}")
-			flag_scope = false;
+				flag_scope = false;
 			return true;
 		}
 		else
 			return false;
 	}
 
-	//Fix it
 	bool addStBlock(const std::string& str) {
-		if (st_pl_cmd.size() != st_pl_cmd.capacity()) {
-			st_pl_cmd.emplace_back(Command(str));
+		st_pl_cmd.emplace_back(Command(str));
+		if (st_pl_cmd.size() == st_pl_cmd.capacity())
 			return true;
-		}
 		else
 			return false;
 	}
@@ -51,7 +49,7 @@ private:
 	//TODO
 	bool addDynBlock(const std::string&) {
 		return true;
-	
+
 	}
 	template <typename T>
 	void printBlock(Iter<T> st, Iter<T> end) {
@@ -71,17 +69,29 @@ public:
 		do {
 			std::cin >> cmd;
 			if (isScope(cmd)) {
-				if (flag_scope) {
 				printBlock<StaticPullBlock>(st_pl_cmd.cbegin(), st_pl_cmd.cend());
-				st_pl_cmd.clear();
+				do {
+					//FIX IT
+					std::cin >> cmd;
 					addDynBlock(cmd);
-				}
-				else 
-					printBlock<DynamicPullBlock>(dn_pl_cmd.cbegin(), dn_pl_cmd.cend());
+					if (cmd != "EOF" || cmd != "}") {
+						printBlock<DynamicPullBlock>(dn_pl_cmd.cbegin(), dn_pl_cmd.cend());
+						dn_pl_cmd.clear();
+					}
+				} while (cmd != "EOF" || cmd != "}");
 			}
-			else
-				addStBlock(cmd);
+			else {
+				do {
+					if (addStBlock(cmd)) {
+						printBlock<StaticPullBlock>(st_pl_cmd.cbegin(), st_pl_cmd.cend());
+						st_pl_cmd.clear();
+					}
+					std::cin >> cmd;
+				} while (cmd != "EOF" || cmd != "{");
+
+			}
 		} while (cmd != "EOF");
+
 	}
 
 };
