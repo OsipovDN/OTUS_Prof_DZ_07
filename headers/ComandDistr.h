@@ -5,46 +5,52 @@
 #include <deque>
 #include <chrono>
 
-struct Command {
-	std::string cmd;
-	std::time_t tm;
 
-	Command(const std::string& str) :cmd(str) {
-		tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	}
-};
-
-using StaticPullBlock = std::vector<Command>;
-using DynamicPullBlock = std::deque<Command>;
-template <typename T>
-using Iter = typename T::const_iterator;
+using StaticPullBlock = std::vector<std::string>;
+using DynamicPullBlock = std::deque<std::string>;
 
 
 class ComandDistr {
 private:
 	StaticPullBlock st_pl_cmd;
 	DynamicPullBlock dn_pl_cmd;
-	bool flag_scope;
+	size_t scope_block;
+
+public:
+	explicit ComandDistr(int& count) :scope_block(0) {
+		st_pl_cmd.reserve(count);
+	}
+
+	void run() {
+		std::string cmd;
+		while (std::getline(std::cin, cmd)) {
+			addStBlock(cmd);
+			addDynBlock(cmd);
+		}
+
+
+	}
 
 	bool isScope(const std::string& str) {
 		if (str == "{" || str == "}") {
 			if (str == "{")
-				flag_scope = true;
+				scope_block++;
 			if (str == "}")
-				flag_scope = false;
+				scope_block--;
 			return true;
 		}
-		else
-			return false;
+		return false;
 	}
 
-	bool addStBlock(const std::string& str) {
-		st_pl_cmd.emplace_back(Command(str));
-		if (st_pl_cmd.size() == st_pl_cmd.capacity())
-			return true;
-		else
-			return false;
+	void addStBlock(const std::string& str) {
+		if (!isScope(str)&&st_pl_cmd.size() != st_pl_cmd.capacity())
+			st_pl_cmd.emplace_back(str);
+		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
+			printBlock(st_pl_cmd);
+			st_pl_cmd.clear();
+		}
 	}
+			
 
 	//TODO
 	bool addDynBlock(const std::string&) {
@@ -52,46 +58,9 @@ private:
 
 	}
 	template <typename T>
-	void printBlock(Iter<T> st, Iter<T> end) {
+	void printBlock(T obj) {
 		std::cout << "bulk: ";
-		std::for_each(st, end - 1, [](const Command& str) {std::cout << str.cmd << ","; });
-		std::cout << (end - 1)->cmd << std::endl;
+		std::for_each(obj.cbegin(), obj.cend() - 1, [](const std::string& str) {std::cout << str << ","; });
+		std::cout << *(obj.cend() - 1) << std::endl;
 	}
-
-public:
-	explicit ComandDistr(int& count) {
-		st_pl_cmd.reserve(count);
-		flag_scope = false;
-	}
-
-	void run() {
-		std::string cmd;
-		do {
-			std::cin >> cmd;
-			if (isScope(cmd)) {
-				printBlock<StaticPullBlock>(st_pl_cmd.cbegin(), st_pl_cmd.cend());
-				do {
-					//FIX IT
-					std::cin >> cmd;
-					addDynBlock(cmd);
-					if (cmd != "EOF" || cmd != "}") {
-						printBlock<DynamicPullBlock>(dn_pl_cmd.cbegin(), dn_pl_cmd.cend());
-						dn_pl_cmd.clear();
-					}
-				} while (cmd != "EOF" || cmd != "}");
-			}
-			else {
-				do {
-					if (addStBlock(cmd)) {
-						printBlock<StaticPullBlock>(st_pl_cmd.cbegin(), st_pl_cmd.cend());
-						st_pl_cmd.clear();
-					}
-					std::cin >> cmd;
-				} while (cmd != "EOF" || cmd != "{");
-
-			}
-		} while (cmd != "EOF");
-
-	}
-
 };
