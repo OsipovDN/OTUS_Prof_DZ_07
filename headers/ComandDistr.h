@@ -25,11 +25,13 @@ public:
 		std::string cmd;
 		while (std::getline(std::cin, cmd)) {
 			if (isScope(cmd)) {
+				if (st_pl_cmd.size() != 0) {
+					printBlock(st_pl_cmd);
+				}
 				continue;
 			}
 			if (scope_block == 0)
 				addStBlock(cmd);
-
 			else
 				addDynBlock(cmd);
 		}
@@ -55,21 +57,21 @@ public:
 			st_pl_cmd.emplace_back(str);
 		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
 			printBlock(st_pl_cmd);
-			st_pl_cmd.clear();
 		}
 	}
 
 
 	//TODO
 	void addDynBlock(const std::string& str) {
+		std::cout << "Heare" << std::endl;
 		dn_pl_cmd.emplace_back(str);
-		return true;
-
 	}
+
 	template <typename T>
 	void printBlock(T obj) {
 		std::cout << "bulk: ";
 		std::for_each(obj.cbegin(), obj.cend() - 1, [](const std::string& str) {std::cout << str << ","; });
 		std::cout << *(obj.cend() - 1) << std::endl;
+		obj.clear();
 	}
 };
