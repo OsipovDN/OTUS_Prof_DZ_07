@@ -24,11 +24,19 @@ public:
 	void run() {
 		std::string cmd;
 		while (std::getline(std::cin, cmd)) {
-			addStBlock(cmd);
-			addDynBlock(cmd);
+			if (isScope(cmd)) {
+				continue;
+			}
+			if (scope_block == 0)
+				addStBlock(cmd);
+
+			else
+				addDynBlock(cmd);
 		}
-
-
+		if (st_pl_cmd.size())
+			printBlock(st_pl_cmd);
+		if (dn_pl_cmd.size())
+			printBlock(dn_pl_cmd);
 	}
 
 	bool isScope(const std::string& str) {
@@ -43,17 +51,18 @@ public:
 	}
 
 	void addStBlock(const std::string& str) {
-		if (!isScope(str)&&st_pl_cmd.size() != st_pl_cmd.capacity())
+		if (!isScope(str) && st_pl_cmd.size() != st_pl_cmd.capacity())
 			st_pl_cmd.emplace_back(str);
 		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
 			printBlock(st_pl_cmd);
 			st_pl_cmd.clear();
 		}
 	}
-			
+
 
 	//TODO
-	bool addDynBlock(const std::string&) {
+	void addDynBlock(const std::string& str) {
+		dn_pl_cmd.emplace_back(str);
 		return true;
 
 	}
