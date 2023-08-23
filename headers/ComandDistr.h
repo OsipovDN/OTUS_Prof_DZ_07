@@ -15,9 +15,10 @@ private:
 	StaticPullBlock st_pl_cmd;
 	DynamicPullBlock dn_pl_cmd;
 	size_t scope_block;
+	bool is_open;
 
 public:
-	explicit ComandDistr(int& count) :scope_block(0) {
+	explicit ComandDistr(int& count) :scope_block(0), is_open(false) {
 		st_pl_cmd.reserve(count);
 	}
 
@@ -25,53 +26,72 @@ public:
 		std::string cmd;
 		while (std::getline(std::cin, cmd)) {
 			if (isScope(cmd)) {
-				if (st_pl_cmd.size() != 0) {
+				if (st_pl_cmd.size() != 0 && is_open) {
 					printBlock(st_pl_cmd);
+					st_pl_cmd.clear();
+				}
+				else if (scope_block == 0 && !is_open) {
+					printBlock(dn_pl_cmd);
+					dn_pl_cmd.clear();
 				}
 				continue;
 			}
-			if (scope_block == 0)
+			if (scope_block == 0 && dn_pl_cmd.size() == 0) {
 				addStBlock(cmd);
-			else
+			}
+			else {
 				addDynBlock(cmd);
+			}
 		}
-		if (st_pl_cmd.size())
+		if (st_pl_cmd.size()) {
 			printBlock(st_pl_cmd);
-		if (dn_pl_cmd.size())
+			st_pl_cmd.clear();
+		}
+		if (dn_pl_cmd.size()) {
 			printBlock(dn_pl_cmd);
+			dn_pl_cmd.clear();
+		}
 	}
 
 	bool isScope(const std::string& str) {
-		if (str == "{" || str == "}") {
-			if (str == "{")
-				scope_block++;
-			if (str == "}")
-				scope_block--;
+		if (str == "{") {
+			is_open = !is_open;
+			scope_block++;
 			return true;
 		}
-		return false;
+		else if (str == "}") {
+			is_open = !is_open;
+			scope_block--;
+			return true;
+		}
+		else
+			return false;
+
 	}
 
 	void addStBlock(const std::string& str) {
-		if (!isScope(str) && st_pl_cmd.size() != st_pl_cmd.capacity())
+		if (st_pl_cmd.size() != st_pl_cmd.capacity()) {
 			st_pl_cmd.emplace_back(str);
+		}
 		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
 			printBlock(st_pl_cmd);
+			st_pl_cmd.clear();
 		}
 	}
 
 
-	//TODO
 	void addDynBlock(const std::string& str) {
-		std::cout << "Heare" << std::endl;
 		dn_pl_cmd.emplace_back(str);
 	}
 
 	template <typename T>
 	void printBlock(T obj) {
 		std::cout << "bulk: ";
-		std::for_each(obj.cbegin(), obj.cend() - 1, [](const std::string& str) {std::cout << str << ","; });
+		std::for_each(obj.cbegin(), obj.cend() - 1, [](const std::string& str) {
+			std::cout << str << ","; 
+			});
 		std::cout << *(obj.cend() - 1) << std::endl;
-		obj.clear();
+
+
 	}
 };
