@@ -1,4 +1,4 @@
-name: 'Comands'
+name: 'Commands'
 
 on:
   push:
@@ -36,8 +36,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Comands-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: Comands-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./commands-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: commands-0.0.${{ github.run_number }}-Linux.deb
           
           asset_content_type: application/vnd.debian.binary-package
 
