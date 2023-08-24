@@ -9,10 +9,9 @@ bool isDig(char* arg) {
 	return std::all_of(num.cbegin(), num.cend(), isdig);
 }
 
-
 int main(int argc, char* argv[])
 {
-	//Проверка корректности ввода
+
 	if (argc != 2) {
 		std::cout << "Incorrect argument input" << std::endl;
 		exit(1);
@@ -22,7 +21,6 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	//Фиксируем введенное значение
 	int count = atoi(argv[1]);
 	ComandDistr CmdDis (count);
 	CmdDis.run();
