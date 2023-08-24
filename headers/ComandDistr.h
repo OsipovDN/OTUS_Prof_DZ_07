@@ -6,7 +6,6 @@
 #include <chrono>
 #include <fstream>
 
-
 using StaticPullBlock = std::vector<std::string>;
 using DynamicPullBlock = std::deque<std::string>;
 
@@ -24,7 +23,8 @@ public:
 	}
 	void run() {
 		std::string cmd;
-		while (!(std::cin>>cmd).eof()) {	//std::getline(std::cin, cmd)
+		DynamicPullBlock temp;
+		while (std::getline(std::cin, cmd)) {
 			if (isScope(cmd)) {
 				if (st_pl_cmd.size() != 0 && is_open) {
 					saveBlock(st_pl_cmd);
@@ -32,6 +32,7 @@ public:
 					st_pl_cmd.clear();
 				}
 				else if (scope_block == 0 && !is_open) {
+					addDynBlock(temp);
 					saveBlock(dn_pl_cmd);
 					printBlockToStream(std::cout, dn_pl_cmd);
 					dn_pl_cmd.clear();
@@ -42,10 +43,10 @@ public:
 				addStBlock(cmd);
 			}
 			else {
-				addDynBlock(cmd);
+				temp.emplace_back(cmd);
 			}
 		}
-		if (st_pl_cmd.size()!=0) {
+		if (st_pl_cmd.size() != 0) {
 			saveBlock(st_pl_cmd);
 			printBlockToStream(std::cout, st_pl_cmd);
 			st_pl_cmd.clear();
@@ -75,13 +76,15 @@ public:
 		}
 		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
 			saveBlock(st_pl_cmd);
-			printBlockToStream(std::cout,st_pl_cmd);
+			printBlockToStream(std::cout, st_pl_cmd);
 			st_pl_cmd.clear();
 		}
 	}
 
-	void addDynBlock(const std::string& str) {
-		dn_pl_cmd.emplace_back(str);
+	void addDynBlock(DynamicPullBlock& obj) {
+		for (const auto& it : obj)
+			dn_pl_cmd.emplace_back(it);
+		obj.clear();
 	}
 
 	template <typename T>
