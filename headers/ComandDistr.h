@@ -1,6 +1,4 @@
 #pragma once
-#include <string>
-#include <algorithm>
 #include <vector>
 #include <deque>
 #include <chrono>
@@ -8,7 +6,6 @@
 
 using StaticPullBlock = std::vector<std::string>;
 using DynamicPullBlock = std::deque<std::string>;
-
 
 class ComandDistr {
 private:
@@ -39,19 +36,16 @@ public:
 				}
 				continue;
 			}
-			if (scope_block == 0 && dn_pl_cmd.size() == 0) {
+			if (scope_block == 0 && dn_pl_cmd.size() == 0) 
 				addStBlock(cmd);
-			}
-			else {
+			else 
 				temp.emplace_back(cmd);
-			}
 		}
 		if (st_pl_cmd.size() != 0) {
 			saveBlock(st_pl_cmd);
 			printBlockToStream(std::cout, st_pl_cmd);
 			st_pl_cmd.clear();
 		}
-
 	}
 
 	bool isScope(const std::string& str) {
@@ -71,9 +65,9 @@ public:
 	}
 
 	void addStBlock(const std::string& str) {
-		if (st_pl_cmd.size() != st_pl_cmd.capacity()) {
+		if (st_pl_cmd.size() != st_pl_cmd.capacity())
 			st_pl_cmd.emplace_back(str);
-		}
+
 		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
 			saveBlock(st_pl_cmd);
 			printBlockToStream(std::cout, st_pl_cmd);
@@ -84,6 +78,7 @@ public:
 	void addDynBlock(DynamicPullBlock& obj) {
 		for (const auto& it : obj)
 			dn_pl_cmd.emplace_back(it);
+
 		obj.clear();
 	}
 
@@ -99,7 +94,6 @@ public:
 			printBlockToStream <std::ofstream, T>(file, obj);
 			return true;
 		}
-
 	}
 
 	template <typename T, typename U>
@@ -110,8 +104,6 @@ public:
 			});
 		stream << *(obj.cend() - 1) << std::endl;
 	}
-
-
 
 	std::string getNameFile() {
 		std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
