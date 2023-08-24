@@ -24,16 +24,16 @@ public:
 	}
 	void run() {
 		std::string cmd;
-		while (std::getline(std::cin, cmd)) {
+		while (!(std::cin>>cmd).eof()) {	//std::getline(std::cin, cmd)
 			if (isScope(cmd)) {
 				if (st_pl_cmd.size() != 0 && is_open) {
 					saveBlock(st_pl_cmd);
-					printBlockToStream(st_pl_cmd, std::cout);
+					printBlockToStream(std::cout, st_pl_cmd);
 					st_pl_cmd.clear();
 				}
 				else if (scope_block == 0 && !is_open) {
 					saveBlock(dn_pl_cmd);
-					printBlockToStream(dn_pl_cmd, std::cout);
+					printBlockToStream(std::cout, dn_pl_cmd);
 					dn_pl_cmd.clear();
 				}
 				continue;
@@ -45,16 +45,12 @@ public:
 				addDynBlock(cmd);
 			}
 		}
-		if (st_pl_cmd.size()) {
+		if (st_pl_cmd.size()!=0) {
 			saveBlock(st_pl_cmd);
-			printBlockToStream(st_pl_cmd, std::cout);
+			printBlockToStream(std::cout, st_pl_cmd);
 			st_pl_cmd.clear();
 		}
-		if (dn_pl_cmd.size()) {
-			saveBlock(dn_pl_cmd);
-			printBlockToStream(dn_pl_cmd, std::cout);
-			dn_pl_cmd.clear();
-		}
+
 	}
 
 	bool isScope(const std::string& str) {
@@ -79,22 +75,13 @@ public:
 		}
 		if (st_pl_cmd.size() == st_pl_cmd.capacity()) {
 			saveBlock(st_pl_cmd);
-			printBlockToStream(st_pl_cmd, std::cout);
+			printBlockToStream(std::cout,st_pl_cmd);
 			st_pl_cmd.clear();
 		}
 	}
 
 	void addDynBlock(const std::string& str) {
 		dn_pl_cmd.emplace_back(str);
-	}
-
-	template <typename T, typename U>
-	void printBlockToStream(const T& obj, U& stream) {
-		std::cout << "bulk: ";
-		std::for_each(obj.cbegin(), obj.cend() - 1, [&stream](const std::string& str) {
-			stream << str << ",";
-			});
-		stream << *(obj.cend() - 1) << std::endl;
 	}
 
 	template <typename T>
@@ -106,11 +93,22 @@ public:
 			return false;
 		}
 		else {
-			printBlockToStream<T, std::ofstream>(obj, file);
+			printBlockToStream <std::ofstream, T>(file, obj);
 			return true;
 		}
 
 	}
+
+	template <typename T, typename U>
+	void printBlockToStream(T& stream, const U& obj) {
+		stream << "bulk: ";
+		std::for_each(obj.cbegin(), obj.cend() - 1, [&stream](const std::string& str) {
+			stream << str << ",";
+			});
+		stream << *(obj.cend() - 1) << std::endl;
+	}
+
+
 
 	std::string getNameFile() {
 		std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
