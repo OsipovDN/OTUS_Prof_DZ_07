@@ -1,4 +1,4 @@
-name: 'Comands'
+name: 'Commands'
 
 on:
   push:
