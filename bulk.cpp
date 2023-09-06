@@ -76,15 +76,12 @@ public:
 	}
 };
 
-
-
 class Command {
 protected:
 	Receiver* res;
 	Command(Receiver& r) :res(r) {};
 public:
 	virtual void execute() const = 0;
-	virtual void executeUnDo() = 0;
 	virtual ~Command() {};
 
 };
@@ -93,14 +90,12 @@ class WriteToConsol :public Command {
 public:
 	explicit WriteToConsol(Receiver& r) :Command(r) {};
 	void execute() const override {};
-	void executeUnDo() override {};
 };
 
 class WriteToFile :public Command {
 public:
-	explicit WriteTofile(Receiver& r) :Command(r) {};
+	explicit WriteToFile(Receiver& r) :Command(r) {};
 	void execute() const override {};
-	void executeUnDo() override {};
 };
 
 //class ReadFromConsol :public Command {
@@ -110,44 +105,49 @@ public:
 //};
 
 
-
 class Invoker {
-private:
-	Command* cmd;
 public:
-	Invoker(Cmd&& com) :cmd(com) {}
-	~Invoker() { delete cmd; }
+	Invoker(Command* com) {
+		com->execute();
+	};
 };
 
+	class Client {
+	private:
+		Receiver* res;
+
+	public:
+		explicit Client(Receiver* r) :res(r) {}
+		void run(std::string& cmd) {
+		}
+	};
 
 
-
-bool isDig(char* arg) {
-	std::string num = arg;
-	auto isdig = [](char ch) {return std::isdigit(ch); };
-	return std::all_of(num.cbegin(), num.cend(), isdig);
-}
-
-int main(int argc, char* argv[])
-{
-
-	if (argc != 2) {
-		std::cout << "Incorrect argument input" << std::endl;
-		exit(1);
-	}
-	if (!isDig(argv[1])) {
-		std::cout << "Not a val" << std::endl;
-		exit(1);
+	bool isDig(char* arg) {
+		std::string num = arg;
+		auto isdig = [](char ch) {return std::isdigit(ch); };
+		return std::all_of(num.cbegin(), num.cend(), isdig);
 	}
 
-	int count = atoi(argv[1]);
-	/*ComandDistr CmdDis(count);
-	CmdDis.run();*/
+	int main(int argc, char* argv[])
+	{
 
-	Receiver* res = new Receiver();
+		if (argc != 2) {
+			std::cout << "Incorrect argument input" << std::endl;
+			exit(1);
+		}
+		if (!isDig(argv[1])) {
+			std::cout << "Not a val" << std::endl;
+			exit(1);
+		}
+
+		int count = atoi(argv[1]);
+		/*ComandDistr CmdDis(count);
+		CmdDis.run();*/
+
+		Receiver* res = new Receiver(count);
+		Invoker* inv = new Invoker();
 
 
-
-
-	return 0;
-}
+		return 0;
+	}
