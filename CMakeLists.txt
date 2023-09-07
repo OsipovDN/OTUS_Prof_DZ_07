@@ -8,10 +8,10 @@ find_package(GTest)
 configure_file(version.h.in version.h)
 
 add_executable (
-    commands
-    "bulk.cpp"
+    bulk
+    bulk.cpp
 )
-add_executable(commands_gtest test/commands_gtest.cpp)
+add_executable(bulk_gtest test/bulk_gtest.cpp)
 
 target_include_directories(
     bulk PRIVATE 
@@ -66,7 +66,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
 
-install(TARGETS commands RUNTIME DESTINATION bin)
+install(TARGETS bulk RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 
