@@ -12,38 +12,11 @@ private:
 	StaticPullBlock st_pl_cmd;
 	DynamicPullBlock dn_pl_cmd;
 	size_t scope_block;
-
-	std::string getNameFile() {
-		std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-		std::string name = "bulk" + std::to_string(time) + ".log";
-		return name;
-	}
-	void addStBlock(const std::string& str) {
-		st_pl_cmd.emplace_back(str);
-	}
-
-	void addDynBlock(const std::string& str) {
-		dn_pl_cmd.emplace_back(str);
-	}
-
-public:
-	explicit Receiver(int& count) :scope_block(0) {
-		st_pl_cmd.reserve(count);
-	}
-
-	void openBlock() {scope_block++;}
-	void closeBlock() {scope_block--;}
-	bool isFull() { return st_pl_cmd.size() == st_pl_cmd.capacity(); }
-	void addBlock(const std::string& cmd) {
-		DynamicPullBlock temp;
-		if (scope_block == 0 && dn_pl_cmd.size() == 0) {
-			addStBlock(cmd);
-		}
-		else
-			addDynBlock(cmd);
-	}
+	bool last_scope;
 
 
+	void addStBlock(const std::string& str) { st_pl_cmd.emplace_back(str); }
+	void addDynBlock(const std::string& str) { dn_pl_cmd.emplace_back(str); }
 	template <typename T>
 	bool saveBlock(T obj) {
 		std::string name = getNameFile();
@@ -57,6 +30,48 @@ public:
 			return true;
 		}
 	}
+
+public:
+	explicit Receiver(int& count) :scope_block(0) {
+		last_scope = false;
+		st_pl_cmd.reserve(count);
+	}
+
+	void openBlock() {
+		scope_block++;
+		last_scope = true;
+	}
+	void closeBlock() {
+		scope_block--;
+		last_scope = true;
+	}
+	size_t isStFull() { return st_pl_cmd.size() == st_pl_cmd.capacity(); }
+	size_t getDnSize() { return dn_pl_cmd.size(); }
+	bool readeToSave() { return last_scope; }
+	void addBlock(const std::string& cmd) {
+		last_scope = false;
+		if (scope_block == 0 && dn_pl_cmd.size() == 0) {
+			addStBlock(cmd);
+		}
+		else
+			addDynBlock(cmd);
+	}
+	void clearBlock() {
+		if (!st_pl_cmd.empty())
+			st_pl_cmd.clear();
+		if (!dn_pl_cmd.empty())
+			dn_pl_cmd.clear();
+	}
+	template <typename T>
+	void save(T& out) {
+		if (st_pl_cmd.size() != 0) 
+			printBlockToStream<T, StaticPullBlock>(out, st_pl_cmd);
+		else if (scope_block == 0) 
+			printBlockToStream<T, DynamicPullBlock>(out, dn_pl_cmd);
+
+	}
+
+
 
 	template <typename T, typename U>
 	void printBlockToStream(T& stream, const U& obj) {
@@ -98,23 +113,44 @@ public:
 		if (!isScope(str))
 			res->addBlock(str);
 	}
-	
+
+};
+
+class WriteToFile :public Command {
+private:
+	std::string getNameFile() {
+		std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		std::string name = "bulk" + std::to_string(time) + ".log";
+		return name;
+	}
+public:
+	explicit WriteToFile(Receiver* r) :Command(r) {};
+	void execute(const std::string&) override {
+		if (res->readeToSave() || res->isStFull()) {
+			std::string name = getNameFile();
+			std::ofstream file(name);
+			if (!file.is_open()) {
+				std::cout << "file is not open!" << std::endl;
+			}
+			else {
+				res->save<std::ofstream>(file);
+			}
+		}
+	}
 };
 
 class WriteToConsol :public Command {
 public:
 	explicit WriteToConsol(Receiver* r) :Command(r) {};
-	void execute(const std::string& cmd) override {
-		res->printBlockToStream(std::cout);
-	
-	};
+	void execute(const std::string&) override {
+		if (res->readeToSave() || res->isStFull()) {
+			res->save<std::ostream>(std::cout);
+			res->clearBlock();
+		}
+	}
 };
 
-class WriteToFile :public Command {
-public:
-	explicit WriteToFile(Receiver* r) :Command(r) {};
-	void execute(const std::string&) override {};
-};
+
 
 
 
@@ -160,8 +196,8 @@ int main(int argc, char* argv[])
 	Receiver* res = new Receiver(count);
 	Invoker* inv = new Invoker();
 	inv->setCommands(new ReadFromConsol(res));
-	inv->setCommands(new WriteToConsol(res));
 	inv->setCommands(new WriteToFile(res));
+	inv->setCommands(new WriteToConsol(res));
 	std::string cmd;
 
 	while (std::getline(std::cin, cmd)) {
@@ -170,7 +206,7 @@ int main(int argc, char* argv[])
 
 	delete inv;
 	delete res;
-	
+
 
 	return 0;
 }
