@@ -71,6 +71,7 @@ public:
 
 	}
 
+	}
 
 
 	template <typename T, typename U>
@@ -206,7 +207,7 @@ int main(int argc, char* argv[])
 
 	delete inv;
 	delete res;
-	
+
 
 
 	return 0;
