@@ -46,8 +46,8 @@ public:
 		last_scope = true;
 	}
 	size_t isStFull() { return st_pl_cmd.size() == st_pl_cmd.capacity(); }
-	size_t getDnSize() { return dn_pl_cmd.size(); }
-	bool readeToSave() { return last_scope; }
+	size_t getStSize() { return st_pl_cmd.size(); }
+	bool readyToSave() { return last_scope; }
 	void addBlock(const std::string& cmd) {
 		last_scope = false;
 		if (scope_block == 0 && dn_pl_cmd.size() == 0) {
@@ -64,14 +64,12 @@ public:
 	}
 	template <typename T>
 	void save(T& out) {
-		if (st_pl_cmd.size() != 0) 
+		if (st_pl_cmd.size() != 0)
 			printBlockToStream<T, StaticPullBlock>(out, st_pl_cmd);
-		else if (scope_block == 0) 
+		else if (scope_block == 0)
 			printBlockToStream<T, DynamicPullBlock>(out, dn_pl_cmd);
 
 	}
-
-
 
 	template <typename T, typename U>
 	void printBlockToStream(T& stream, const U& obj) {
@@ -110,7 +108,7 @@ private:
 public:
 	explicit ReadFromConsol(Receiver* r) :Command(r) {}
 	void execute(const std::string& str) override {
-		if (!isScope(str))
+		if (!isScope(str)&&str!="\n")
 			res->addBlock(str);
 	}
 
@@ -125,8 +123,8 @@ private:
 	}
 public:
 	explicit WriteToFile(Receiver* r) :Command(r) {};
-	void execute(const std::string& cmd) override {
-		if (res->readeToSave() || res->isStFull()) {
+	void execute(const std::string&cmd) override {
+		if (res->readyToSave() || res->isStFull()||cmd=="\n") {
 			std::string name = getNameFile();
 			std::ofstream file(name);
 			if (!file.is_open()) {
@@ -142,11 +140,12 @@ public:
 class WriteToConsol :public Command {
 public:
 	explicit WriteToConsol(Receiver* r) :Command(r) {};
-	void execute(const std::string& cmd) override {
-		if (res->readeToSave() || res->isStFull()) {
+	void execute(const std::string&) override {
+		if (res->readyToSave() || res->isStFull()) {
 			res->save<std::ostream>(std::cout);
 			res->clearBlock();
 		}
+
 	}
 };
 
@@ -200,13 +199,15 @@ int main(int argc, char* argv[])
 	inv->setCommands(new WriteToConsol(res));
 	std::string cmd;
 
-	while (std::getline(std::cin, cmd)) {
+	
+	do {
+		std::getline(std::cin, cmd);
 		inv->runCommands(cmd);
-	}
+	} while (!std::cin.eof());
 
 	delete inv;
 	delete res;
-	
+
 
 
 	return 0;
