@@ -108,7 +108,8 @@ private:
 public:
 	explicit ReadFromConsol(Receiver* r) :Command(r) {}
 	void execute(const std::string& str) override {
-		if (!isScope(str)&&str!="\n")
+		std::cout << "_____" << str << "_____" << std::endl;
+		if (!isScope(str))
 			res->addBlock(str);
 	}
 
@@ -123,8 +124,8 @@ private:
 	}
 public:
 	explicit WriteToFile(Receiver* r) :Command(r) {};
-	void execute(const std::string&cmd) override {
-		if (res->readyToSave() || res->isStFull()||cmd=="\n") {
+	void execute(const std::string&str) override {
+		if (res->readyToSave() || res->isStFull()||str=="\n") {
 			std::string name = getNameFile();
 			std::ofstream file(name);
 			if (!file.is_open()) {
@@ -140,8 +141,8 @@ public:
 class WriteToConsol :public Command {
 public:
 	explicit WriteToConsol(Receiver* r) :Command(r) {};
-	void execute(const std::string&) override {
-		if (res->readyToSave() || res->isStFull()) {
+	void execute(const std::string&str) override {
+		if (res->readyToSave() || res->isStFull()|| str == "\n") {
 			res->save<std::ostream>(std::cout);
 			res->clearBlock();
 		}
